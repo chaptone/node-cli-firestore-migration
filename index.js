@@ -5,7 +5,6 @@ const migration = require('./migration/migration.js')
 const question = require('./question/question.js')
 
 const start = async () => {
-  const bar1 = new _cliProgress.SingleBar({}, _cliProgress.Presets.shades_classic)
   const sheetName = await getSheetName()
   const answer = await inquirer.prompt(question(sheetName))
   const { table, stage } = answer
@@ -17,7 +16,7 @@ const start = async () => {
   }, { concurrency: 1 })
   return await Promise.map(stage, async st => {
       console.log(`\nOn stage.. ${st}\n`)
-      await migration(st, sheet, bar1)
+      await migration(st, sheet)
   }, { concurrency: 1 } )
 }
 

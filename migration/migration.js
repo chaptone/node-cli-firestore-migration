@@ -7,7 +7,7 @@ const { getFirebaseSecret } = require('../secret/secret.js')
 let adminSDKInit = false
 const app = {}
 
-const migration = async (stage, data, bar1) => {
+const migration = async (stage, data) => {
   if (!adminSDKInit) {
     app[stage] = admin.initializeApp({ credential: admin.credential.cert(getFirebaseSecret(stage)) })
     adminSDKInit = true
@@ -24,38 +24,26 @@ const migration = async (stage, data, bar1) => {
   return Promise.map(data, async sheet => {
     if (sheet.parent && sheet.parent.length) {
       await createParent(categoryRef, sheet.parent)
-      bar1.increment();
-      bar1.update(20);
       console.log(`Migrated parent to ${stage}`)
     }
     if (sheet.category && sheet.category.length) {
       await createCategory(categoryRef, sheet.category)
-      bar1.increment();
-      bar1.update(20);
       console.log(`Migrated category to ${stage}`)
     }
     if (sheet.quiz && sheet.quiz.length) {
       await createQuiz(quizRef, sheet.quiz)
-      bar1.increment();
-      bar1.update(20);
       console.log(`Migrated quiz to ${stage}`)
     }
     if (sheet.grading && sheet.grading.length) {
       await createGrading(gradingRef, sheet.grading)
-      bar1.increment();
-      bar1.update(20);
       console.log(`Migrated grading to ${stage}`)
     }
     if (sheet.faculty && sheet.faculty.length) {
       createFaculty(categoryRef, sheet.faculty)
-      bar1.increment();
-      bar1.update(20);
       console.log(`Migrated faculty to ${stage}`)
     }
     if (sheet.occupation && sheet.occupation.length) {
       createOccupation(categoryRef, sheet.occupation)
-      bar1.increment();
-      bar1.update(20);
       console.log(`Migrated occupation to ${stage}`)
     }
   }, { concurrency: 1} )
@@ -66,8 +54,9 @@ const createParent = async (categoryRef, data) => {
   if (!data.every(d => d.id)) throw new Error(error)
   return Promise.map(data, async d => {
     const id = d.id
+    d.is21Skill = d.is21Skill === 'yes'
     d.timestamp = admin.firestore.FieldValue.serverTimestamp()
-    return categoryRef.doc(id).set(_.omit(d, 'id'))
+    return categoryRef.doc(id).update(_.omit(d, 'id'))
   })
 }
 
@@ -76,9 +65,9 @@ const createCategory = async (categoryRef, data) => {
   if (!data.every(d => d.id)) throw new Error(error)
   return Promise.map(data, async d => {
     const id = d.id
-    if (d.is_21_skill) d.is_21_skill = d.is_21_skill === 'yes'
+    d.is21Skill = d.is21Skill === 'yes'
     d.timestamp = admin.firestore.FieldValue.serverTimestamp()
-    return categoryRef.doc(id).set(_.omit(d, 'id'))
+    return categoryRef.doc(id).update(_.omit(d, 'id'))
   })
 }
 
