@@ -75,40 +75,40 @@ const createQuiz = async (quizRef, data) => {
   const error = 'Can not migrate quiz table of undefined id.'
   if (!data.every(d => d.id)) throw new Error(error)
   const quiz = data.reduce((result, d) => {
-    result.question[d.id] = d
+    result.questions[d.id] = d
     return result
-  }, { question: {}, is_active: true, timestamp: admin.firestore.FieldValue.serverTimestamp() })
+  }, { questions: {}, isActive: true, timestamp: admin.firestore.FieldValue.serverTimestamp() })
   return quizRef.doc(moment().format('YYYY-MM-DD')).set(quiz)
 }
 
 const createGrading = async (gradingRef, data) => {
-  const error = 'Can not migrate grading table of undefined category_id.'
-  if (!data.every(d => d.category_id)) throw new Error(error)
+  const error = 'Can not migrate grading table of undefined categoryId.'
+  if (!data.every(d => d.categoryId)) throw new Error(error)
   const grading = data.reduce((result, d) => {
-    result.categories[d.category_id] = _.omit(d, 'category_id')
+    result.categories[d.categoryId] = _.omit(d, 'categoryId')
     return result
-  }, { categories: {}, quizId: moment().format('YYYY-MM-DD'), is_active: true, timestamp: admin.firestore.FieldValue.serverTimestamp() })
+  }, { categories: {}, quizId: moment().format('YYYY-MM-DD'), isActive: true, timestamp: admin.firestore.FieldValue.serverTimestamp() })
   return gradingRef.doc(moment().format('YYYY-MM-DD')).set(grading)
 }
 
 const createFaculty = async (categoryRef, data) => {
-  const error = 'Can not migrate faculty table of undefined category_id.'
-  if (!data.every(d => d.category_id)) throw new Error(error)
-  const groupedFac = _.reduce(_.groupBy(data, 'category_id'), (r, v, k) => r.concat([v]), [])
+  const error = 'Can not migrate faculty table of undefined categoryId.'
+  if (!data.every(d => d.categoryId)) throw new Error(error)
+  const groupedFac = _.reduce(_.groupBy(data, 'categoryId'), (r, v, k) => r.concat([v]), [])
   return Promise.map(groupedFac, async f => {
-    const id = f[0].category_id
-    const faculty = f.map(fa => _.omit(fa, 'category_id'))
+    const id = f[0].categoryId
+    const faculty = f.map(fa => _.omit(fa, 'categoryId'))
     return categoryRef.doc(id).update({ factory_relations: faculty })
   })
 }
 
 const createOccupation = async (categoryRef, data) => {
-  const error = 'Can not migrate faculty table of undefined category_id.'
-  if (!data.every(d => d.category_id)) throw new Error(error)
-  const groupedOcc = _.reduce(_.groupBy(data, 'category_id'), (r, v, k) => r.concat([v]), [])
+  const error = 'Can not migrate faculty table of undefined categoryId.'
+  if (!data.every(d => d.categoryId)) throw new Error(error)
+  const groupedOcc = _.reduce(_.groupBy(data, 'categoryId'), (r, v, k) => r.concat([v]), [])
   return Promise.map(groupedOcc, async o => {
-    const id = o[0].category_id
-    const occupation = o.map(oc => _.omit(oc, 'category_id'))
+    const id = o[0].categoryId
+    const occupation = o.map(oc => _.omit(oc, 'categoryId'))
     return categoryRef.doc(id).update({ occupation_relations: occupation })
   })
 }
